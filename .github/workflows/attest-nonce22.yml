@@ -1,0 +1,38 @@
+name: Attest historical M0 nonce 22
+
+on:
+  push:
+    branches: [feat/attest-nonce-22]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  MAINNET_RPC_URL: https://eth.drpc.org
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: foundry-rs/foundry-toolchain@dba66c27052e63476d886f22216e119ba7e615bf
+        with:
+          version: v1.8.1
+      - name: Install pinned replay dependencies
+        run: git -c url.https://github.com/.insteadOf=git@github.com: submodule update --init --recursive --jobs 8 lib/forge-std lib/common
+      - name: Check formatting and historical replay tests
+        env:
+          FOUNDRY_PROFILE: attest
+        run: |
+          forge fmt --check script/ProposeTransferSwapFacilityOwner.s.sol attest/ReplayNonce22.s.sol attest-test/ReplayNonce22.t.sol
+          forge lint script/ProposeTransferSwapFacilityOwner.s.sol attest/ReplayNonce22.s.sol attest-test/ReplayNonce22.t.sol
+          forge test -vv
+      - name: Attest pinned producer and compare the Safe service record
+        id: attest
+        uses: crossecute/forge-attest@998d11c9325990a74c534ef406a968c509d1544a
+        with:
+          config: attest-nonce22.toml
+          install-foundry: "false"
+          require-live: "true"

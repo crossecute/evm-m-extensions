@@ -63,3 +63,26 @@ historical source is a matching reconstruction, not an authenticated record of
 the original build environment. This demo covers one `evm-m-extensions` script.
 The related `common`, `m-portal` and `safe-utils` forks are available for later
 adoption; the replay retains the producer's historical dependency gitlinks.
+
+## Forge Attest
+
+The root `attest-nonce22.toml` pins the tested producer commit, toolchain, raw
+output hash, canonical hash and complete Safe hash. Use verifier revision
+`998d11c9325990a74c534ef406a968c509d1544a`:
+
+```bash
+git clone https://github.com/crossecute/forge-attest ../m0-forge-attest
+git -C ../m0-forge-attest checkout 998d11c9325990a74c534ef406a968c509d1544a
+MAINNET_RPC_URL="$MAINNET_RPC_URL" ../m0-forge-attest/attest.sh \
+  --config "$PWD/attest-nonce22.toml" --require-live --json
+```
+
+The verifier independently clones the producer, regenerates the output, checks
+raw and canonical digests, derives the EIP-712 hash with cast and Solidity, and
+compares the Safe service record at nonce 22. This nonce is already executed;
+the service comparison is historical, not evidence of a pending proposal. Do not
+use the signing/submission option `--attest` for this case study.
+
+The CI workflow runs the fork tests and the same pinned claim with required
+service comparison. A service or archive RPC outage fails CI. Neither endpoint
+is replaced with a checked-in response during verification.
