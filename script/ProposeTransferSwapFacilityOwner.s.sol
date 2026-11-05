@@ -2,20 +2,18 @@
 
 pragma solidity 0.8.26;
 
-import { console } from "../lib/forge-std/src/console.sol";
+import {console} from "../lib/forge-std/src/console.sol";
 import {
     AccessControl
 } from "../lib/common/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-import { ScriptBase } from "./ScriptBase.s.sol";
-import { MultiSigBatchBase } from "../lib/common/script/MultiSigBatchBase.sol";
+import {MultiSigBatchBase} from "../lib/common/script/MultiSigBatchBase.sol";
 import {
     Ownable
 } from "../lib/common/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
 /**
  * @title ProposeTransferSwapFacilityOwner
- * @notice Script to transfer swap facility ownership to timelock controller
- * @dev This script transfers the DEFAULT_ADMIN_ROLE of the swap facility to a new owner (timelock)
+ * @notice Transfers ProxyAdmin ownership to the timelock and SwapFacility admin rights to the engineering Safe.
  */
 contract ProposeTransferSwapFacilityOwner is MultiSigBatchBase {
     address constant _SAFE_MULTISIG = 0xdcf79C332cB3Fe9d39A830a5f8de7cE6b1BD6fD1;
@@ -26,9 +24,8 @@ contract ProposeTransferSwapFacilityOwner is MultiSigBatchBase {
     // TransparentProxy address of SwapFacility on mainnet
     address constant _SWAP_FACILITY = 0xB6807116b3B1B321a390594e31ECD6e0076f6278;
 
-    function run() external {
+    function run() external virtual {
         address proposer_ = vm.rememberKey(vm.envUint("PRIVATE_KEY"));
-        bytes32 DEFAULT_ADMIN_ROLE = AccessControl(_SWAP_FACILITY).DEFAULT_ADMIN_ROLE();
 
         require(_MAINNET_TIMELOCK != address(0), "New owner cannot be zero address");
         console.log("Current chain ID:", block.chainid);
@@ -38,19 +35,20 @@ contract ProposeTransferSwapFacilityOwner is MultiSigBatchBase {
         console.log("New owner (timelock):", _MAINNET_TIMELOCK);
         console.log("Proposer:", proposer_);
 
-        // transfer proxyAdmin ownership to newOwner_
-        _addToBatch(_PROXY_ADMIN, abi.encodeCall(Ownable.transferOwnership, (_MAINNET_TIMELOCK)));
-
-        // transfer swap facility DEFAULT_ADMIN_ROLE to newOwner_
-        _addToBatch(_SWAP_FACILITY, abi.encodeCall(AccessControl.grantRole, (DEFAULT_ADMIN_ROLE, _ENG_MULTISIG)));
-
-        // renounce swap facility DEFAULT_ADMIN_ROLE from Multisig
-        _addToBatch(_SWAP_FACILITY, abi.encodeCall(AccessControl.renounceRole, (DEFAULT_ADMIN_ROLE, _SAFE_MULTISIG)));
-
-        // execute `the batch via multisig
+        _buildBatch();
         _simulateBatch(_SAFE_MULTISIG);
         _proposeBatch(_SAFE_MULTISIG, proposer_);
 
         console.log("SwapFacility ownership transfer proposed.");
+    }
+
+    function _buildBatch() internal {
+        bytes32 DEFAULT_ADMIN_ROLE = AccessControl(_SWAP_FACILITY).DEFAULT_ADMIN_ROLE();
+
+        _addToBatch(_PROXY_ADMIN, abi.encodeCall(Ownable.transferOwnership, (_MAINNET_TIMELOCK)));
+
+        _addToBatch(_SWAP_FACILITY, abi.encodeCall(AccessControl.grantRole, (DEFAULT_ADMIN_ROLE, _ENG_MULTISIG)));
+
+        _addToBatch(_SWAP_FACILITY, abi.encodeCall(AccessControl.renounceRole, (DEFAULT_ADMIN_ROLE, _SAFE_MULTISIG)));
     }
 }
