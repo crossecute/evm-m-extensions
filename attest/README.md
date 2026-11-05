@@ -61,8 +61,8 @@ The matching hash and valid historical signatures establish transaction equality
 They do not establish which commit the original operator ran. The selected
 historical source is a matching reconstruction, not an authenticated record of
 the original build environment. This demo covers one `evm-m-extensions` script.
-The related `common`, `m-portal` and `safe-utils` forks are available for later
-adoption; the replay retains the producer's historical dependency gitlinks.
+The replay retains the producer's historical upstream dependency gitlinks and
+does not require separate `common` or `safe-utils` forks. It does not use `m-portal`.
 
 ## Forge Attest
 
