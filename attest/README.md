@@ -21,7 +21,7 @@ Use Foundry 1.8.1 and an Ethereum archive RPC:
 
 ```bash
 git clone https://github.com/crossecute/forge-attest ../m0-forge-attest
-git -C ../m0-forge-attest checkout 6ba05810e4252c87805af1c518fab6e228ea96f8
+git -C ../m0-forge-attest checkout 27727236af75dda63698d86ef3984b5206309634
 export MAINNET_RPC_URL='YOUR_ETHEREUM_ARCHIVE_RPC_URL'
 ../m0-forge-attest/attest.sh --config "$PWD/attest-nonce22.toml" --require-live --json
 ```

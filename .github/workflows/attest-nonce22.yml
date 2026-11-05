@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: crossecute/forge-attest@6ba05810e4252c87805af1c518fab6e228ea96f8
+      - uses: crossecute/forge-attest@27727236af75dda63698d86ef3984b5206309634
         with:
           config: attest-nonce22.toml
           foundry-version: v1.8.1
