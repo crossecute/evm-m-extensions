@@ -21,7 +21,8 @@ jobs:
         with:
           version: v1.8.1
       - name: Install pinned replay dependencies
-        run: git -c url.https://github.com/.insteadOf=git@github.com: submodule update --init --recursive --jobs 8 lib/forge-std lib/common
+        run: |
+          git -c url.https://github.com/.insteadOf=git@github.com: submodule update --init --recursive --jobs 8 lib/forge-std lib/common
       - name: Check formatting and historical replay tests
         env:
           FOUNDRY_PROFILE: attest
