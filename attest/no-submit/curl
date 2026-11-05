@@ -1,0 +1,10 @@
+#!/bin/sh
+while [ "$#" -gt 1 ]; do
+    if [ "$1" = '-d' ]; then
+        printf '%s' "$2" > out/m0-nonce-22.json
+        printf '{}\n201\n'
+        exit 0
+    fi
+    shift
+done
+exit 1
